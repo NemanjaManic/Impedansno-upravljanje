@@ -17,8 +17,20 @@ cd Impedansno-upravljanje
 pip install -r requirements.txt
 ```
 
-### 3. Pokretanje koda
 
+### 3. Dodavanje objekta (kutije) u scenu
+
+Ukoliko želite da testirate kontakt i interakciju robota sa okolinom, u `panda.xml` fajl je potrebno dodati sledeći objekat (geom):
+
+```xml
+<geom name="large_box"
+      type="box"
+      size="0.2 0.4 0.2"
+      pos="0.7 0.0 0.2"
+      rgba="0.8 0.3 0.3 0.7"/>
+```
+
+### 4. Pokretanje koda
 ```bash
 python Panda_ImpedanceControl_TAU.py
 ```
