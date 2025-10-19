@@ -12,8 +12,13 @@ cd Impedansno-upravljanje
 ```
 
 ### 2. Instalacija Python biblioteka
-
+Koristim Python 3.10 verziju pythona, u virtuelnom okruženju (preporučeno, PyCharm automatski kreira venv):
 ```bash
+# Ako koristiš PyCharm, samo aktiviraj venv koji on kreira
+# Ili ručno kreiraj virtuelno okruženje:
+python -m venv venv
+source venv/bin/activate # Linux/Mac
+venv\Scripts\activate # Windows
 pip install -r requirements.txt
 ```
 
