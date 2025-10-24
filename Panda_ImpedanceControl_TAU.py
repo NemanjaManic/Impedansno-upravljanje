@@ -12,9 +12,8 @@ pinocchio_robot = load_pinocchio("panda_description")
 pinocchio_model = pinocchio_robot.model
 pinocchio_data = pinocchio_robot.data
 #mujoco model
-mujoco_model = load_mujoco("panda_mj_description")
+mujoco_model = load_mujoco("panda_mj_description_box")
 mujoco_data = mujoco.MjData(mujoco_model)
-
 
 #Podesavanje simulacije
 dt = 0.001
@@ -99,12 +98,12 @@ for i in range(N):
     dx = J @ dq
 
     #Sinteza_trajektorije vraća željenu poziciju, brzinu i ubrzanje u trenutku t
-    x_d, dx_d, ddx_d = sinteza_trajektorije(x_start, x_goal, t, T_traj)
-    # dx_d = np.concatenate([dx_d[:3], np.zeros(3)])
-    # ddx_d = np.concatenate([ddx_d[:3], np.zeros(3)])
+    x_d, dx_d, ddx_d = sinteza_trajektorije(x_start[:3], x_goal[:3], t, T_traj)
+    dx_d = np.concatenate([dx_d[:3], np.zeros(3)])
+    ddx_d = np.concatenate([ddx_d[:3], np.zeros(3)])
 
     #Racunanje greske pozicije i orijentacije
-    r_d = pin.rpy.rpyToMatrix(x_d[3:])
+    r_d = pin.rpy.rpyToMatrix(x_start[3:]).copy()
     #x_error = np.concatenate([x_d[:3] - pozicija_hvataljke, pin.rpy.matrixToRpy(r_d@orijentacija_hvataljke.T)])
     x_error = np.concatenate([x_d[:3] - pozicija_hvataljke, pin.log3(r_d @ orijentacija_hvataljke.T)])
     dx_error = dx_d - dx
