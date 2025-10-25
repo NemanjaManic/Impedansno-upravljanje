@@ -6,22 +6,22 @@ from robot_descriptions.loaders.pinocchio import load_robot_description as load_
 from robot_descriptions.loaders.mujoco import load_robot_description as load_mujoco
 from Funkcije import sinteza_trajektorije
 
-#Ucitavanje modela
-#pinocchio model
+# ===Ucitavanje modela=== #
+# ---pinocchio model--- #
 pinocchio_robot = load_pinocchio("panda_description")
 pinocchio_model = pinocchio_robot.model
 pinocchio_data = pinocchio_robot.data
-#mujoco model
+# ---mujoco model--- #
 mujoco_model = load_mujoco("panda_mj_description_box")
 mujoco_data = mujoco.MjData(mujoco_model)
 
-#Podesavanje simulacije
+# ===Podesavanje simulacije=== #
 dt = 0.001
 T = 10.0
 T_traj = 3
 N = int(T/dt)
 mujoco_model.opt.timestep = dt
-#pocetne konfiguracije
+# ---pocetne konfiguracije--- #
 nq = pinocchio_model.nq
 ndq = pinocchio_model.nv
 q0 = np.zeros(nq)
@@ -30,24 +30,39 @@ mujoco_data.qpos[:] = q0.copy()
 mujoco_data.qvel[:] = dq0.copy()
 v = viewer.launch_passive(mujoco_model,mujoco_data)
 
-#TCP alata(hvataljke) u urdf fajlu - koordinatni sistem na kraju effektora
+# ===TCP alata(hvataljke) u urdf fajlu - koordinatni sistem na kraju effektora=== #
 frame = "panda_hand_tcp"
 frame_id = pinocchio_model.getFrameId(frame)
 
-#Parametri impedansnog upravljanja
-Hm = np.diag([100, 100, 100, 100, 100, 100])
-Dm = np.diag([2500, 2500, 2500, 1200, 1200, 1200])
-Km = np.diag([10000, 10000, 10000, 7000, 7000, 7000])
+# ===Parametri impedansnog upravljanja=== #
+# Hm = np.diag([1000, 1000, 1000, 500, 500, 500])
+# Dm = np.diag([2000, 2000, 2000, 1000, 1000, 1000])
+# Km = np.diag([5000, 5000, 5000, 3000, 3000, 3000])
 
-#Parametri trajektorije, pocetni i krajnji target trajektorije
-x_start = np.array([0.7, -0.2, 0.37,np.pi,0.0,0.0]) #dodao sam kutiju koja je visine 0.4
-#kutiju sam dodao u xml fajl i  to izgleda ovako
-#<geom name="large_box"
-        #  type="box"
-       #   size="0.2 0.4 0.2"
-       #   pos="0.7 0.0 0.2"
-        #  rgba="0.8 0.3 0.3 0.7"/>
-x_goal = np.array([0.7, 0.2, 0.38,np.pi,0.0,0.0])
+# === Parametri impedanse preko prirodne frekvencije i prigusenja === #
+# ---Zeljena krutost--- #
+K_trans = np.array([10000, 10000, 500])  # translacija
+K_rot   = np.array([100, 100, 100])  # rotacija
+K_diag  = np.concatenate([K_trans, K_rot])
+Km = np.diag(K_diag)
+
+# ---Prirodna ucestanost--- #
+wn_trans = np.array([10., 10., 5.])   # translacione ose
+wn_rot   = np.array([16., 16., 16.])   # rotacione ose
+wn_diag  = np.concatenate([wn_trans, wn_rot])
+
+# ---Zeljena inercija--- #
+Hm_diag = K_diag / (wn_diag**2)
+Hm = np.diag(Hm_diag)
+
+# ---Prigusenje--- #
+zeta = 1.0
+Dm_diag = 2.0 * zeta * (K_diag / wn_diag)
+Dm = np.diag(Dm_diag)
+
+# ---Parametri trajektorije, pocetni i krajnji target trajektorije--- #
+x_start = np.array([0.7, -0.2, 0.3,np.pi,0.0,0.0])
+x_goal = np.array([0.7, 0.2, 0.3,np.pi,0.0,0.0])
 
 #Test konverzije rpy uglova, provera konzistentnosti pinocchio biblioteke
 #cilj je proveriti da li direktna i inverzna transformacija rpy daju iste rezultate
@@ -92,7 +107,24 @@ for i in range(N):
     #Jakobijan
     J = pin.computeFrameJacobian(pinocchio_model, pinocchio_data, q, frame_id, pin.ReferenceFrame.LOCAL_WORLD_ALIGNED)
     dJ = pin.frameJacobianTimeVariation(pinocchio_model, pinocchio_data, q, dq, frame_id, pin.ReferenceFrame.LOCAL_WORLD_ALIGNED)
-    pInvJ = J.T @ np.linalg.inv(J @ J.T + 0.3**2 * np.eye(6))
+    #pInvJ = J.T @ np.linalg.inv(J @ J.T + 0.3**2 * np.eye(6))
+
+    # ---Dinamicka regularizacija Jakobijana--- #
+    # -Racunanje singularnih vrednosti Jakobijana- #
+    U, s, Vt = np.linalg.svd(J)  # J = U @ np.diag(s) @ Vt
+    sigma_min = np.min(s)  # minimalna singularna vrednost
+
+    # Parametri za adaptivnu regularizaciju
+    epsilon = 0.03  # granica za "zonu uticaja singulariteta"
+    k_max = 0.3  # maksimalna vrednost faktora regularizacije
+    # Izračunavanje k^2 prema datoj formuli
+    if sigma_min >= epsilon:
+        k_squared = 0.0
+    else:
+        k_squared = (1 - (sigma_min / epsilon) ** 2) * k_max ** 2
+
+    # Pseudoinverzija sa adaptivnom regularizacijom
+    pInvJ = J.T @ np.linalg.inv(J @ J.T + k_squared  * np.eye(6))#k=k_squared
 
     #Brzina vrha hvataljke
     dx = J @ dq
