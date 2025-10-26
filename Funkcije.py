@@ -15,5 +15,4 @@ def sinteza_trajektorije(x_start, x_goal, t, T_traj):
         x_d = (6 * (x_goal - x_start) * t ** 5 / T ** 5 - 15 * (x_goal - x_start) * t ** 4 / T ** 4 + 10 * (x_goal - x_start) * t ** 3 / T ** 3 + x_start)
         dx_d = (30 * (x_goal - x_start) * t ** 4 / T ** 5 - 60 * (x_goal - x_start) * t ** 3 / T ** 4 + 30 * (x_goal - x_start) * t ** 2 / T ** 3)
         ddx_d = (120 * (x_goal - x_start) * t ** 3 / T ** 5 - 180 * (x_goal - x_start) * t ** 2 / T ** 4 + 60 * (x_goal - x_start) * t / T ** 3)
-
         return x_d, dx_d, ddx_d

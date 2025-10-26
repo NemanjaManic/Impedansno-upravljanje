@@ -30,8 +30,8 @@ Ukoliko želite da testirate kontakt i interakciju robota sa okolinom, u `panda.
 ```xml
 <geom name="large_box"
       type="box"
-      size="0.2 0.4 0.2"
-      pos="0.7 0.0 0.2"
+      size="0.2 0.4 0.125"
+      pos="0.6 0.0 0.125"
       rgba="0.8 0.3 0.3 0.7"/>
 ```
 

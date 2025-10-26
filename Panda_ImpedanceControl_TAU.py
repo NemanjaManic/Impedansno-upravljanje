@@ -12,7 +12,7 @@ pinocchio_robot = load_pinocchio("panda_description")
 pinocchio_model = pinocchio_robot.model
 pinocchio_data = pinocchio_robot.data
 # ---mujoco model--- #
-mujoco_model = load_mujoco("panda_mj_description_box")
+mujoco_model = load_mujoco("panda_mj_description")
 mujoco_data = mujoco.MjData(mujoco_model)
 
 # ===Podesavanje simulacije=== #
@@ -61,8 +61,8 @@ Dm_diag = 2.0 * zeta * (K_diag / wn_diag)
 Dm = np.diag(Dm_diag)
 
 # ---Parametri trajektorije, pocetni i krajnji target trajektorije--- #
-x_start = np.array([0.6, -0.2, 0.3,np.pi,0.0,0.0])
-x_goal = np.array([0.6, 0.2, 0.3,np.pi,0.0,0.0])
+x_start = np.array([0.6, -0.2, 0.23,np.pi,0.0,0.0])
+x_goal = np.array([0.6, 0.2, 0.23,np.pi,0.0,0.0])
 
 #Test konverzije rpy uglova, provera konzistentnosti pinocchio biblioteke
 #cilj je proveriti da li direktna i inverzna transformacija rpy daju iste rezultate
@@ -76,7 +76,7 @@ print(f"Vraćeno RPY: {back_to_rpy}")
 print(f"Razlika: {test_rpy - back_to_rpy}")
 
 #inicijalizacija spoljasnje sile, probao sam da testiram sa silom kada je nula i kada je ukljucim dole u kodu
-Fext = np.zeros(6)
+#Fext = np.zeros(6)
 
 for i in range(N):
     t = i * dt #vreme simulacije
@@ -88,16 +88,17 @@ for i in range(N):
 
     #Merenje spoljasnjih sila tj kontakata sa okolinom pomocu mujoco
     # Ova metoda prebrojava sve kontakte i računa ukupne sile i momente
-    # contact_forces = []
-    # for id, contact in enumerate(mujoco_data.contact):
-    #     force = np.zeros(6)
-    #     mujoco.mj_contactForce(mujoco_model, mujoco_data, id, force)
-    #     contact_forces.append(force.copy())
-    # total_contact_force = np.sum([f[:3] for f in contact_forces], axis=0) if contact_forces else np.zeros(3)
-    # total_contact_torque = np.sum([f[3:] for f in contact_forces], axis=0) if contact_forces else np.zeros(3)
-    # force_magnitude = np.linalg.norm(total_contact_force)
-    # Fext = np.concatenate([total_contact_force, total_contact_torque])
-    
+    contact_forces = []
+    for id, contact in enumerate(mujoco_data.contact):
+        force = np.zeros(6)
+        mujoco.mj_contactForce(mujoco_model, mujoco_data, id, force)
+        contact_forces.append(force.copy())
+    total_contact_force = np.sum([f[:3] for f in contact_forces], axis=0) if contact_forces else np.zeros(3)
+    total_contact_torque = np.sum([f[3:] for f in contact_forces], axis=0) if contact_forces else np.zeros(3)
+    force_magnitude = np.linalg.norm(total_contact_force)
+    Fext = np.concatenate([total_contact_force, total_contact_torque])
+    print(Fext)
+
     #Podaci o end effectoru
     pin.framesForwardKinematics(pinocchio_model, pinocchio_data, q) # Računanje kinematike svih frame-ova
     poz_orij_hvataljke = pinocchio_data.oMf[frame_id]
