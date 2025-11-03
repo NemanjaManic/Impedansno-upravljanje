@@ -137,17 +137,11 @@ for i in range(N):
 
     #
     r_d = pin.rpy.rpyToMatrix(rpy_const)
-    # x_error = np.concatenate([x_d[:3]-tcp_pos, pin.log3(r_d @ tcp_rot.T)])
-    # --- pozicioni deo (isti) ---
+    # ---pozicioni greska---
     pos_error = x_d[:3] - tcp_pos
-
-    # --- ugaona greška u lokalnom okviru end-effectora ---
-    rot_err_local = pin.log3(tcp_rot.T@r_d)  # vraća vektor u end-effector (lokal) okviru
-
-    # --- prebaci ugaonu grešku u bazu/world koristeći tcp_rot (R_world_end) ---
+    # ---greska orijentacije---
+    rot_err_local = pin.log3(tcp_rot.T@r_d)
     rot_err_world = tcp_rot @ rot_err_local
-
-    # --- kompletan error u world okviru ---
     x_error = np.concatenate([pos_error, rot_err_world])
     dx_error = dx_d - dx
 
