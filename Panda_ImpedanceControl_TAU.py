@@ -12,7 +12,7 @@ pinocchio_robot = load_pinocchio("panda_description")
 pinocchio_model = pinocchio_robot.model
 pinocchio_data = pinocchio_robot.data
 # ---mujoco model--- #
-mujoco_model = load_mujoco("panda_mj_description")
+mujoco_model = load_mujoco("panda_mj_description_box")
 mujoco_data = mujoco.MjData(mujoco_model)
 
 # ===Podesavanje simulacije=== #
@@ -39,7 +39,7 @@ frame_id = pinocchio_model.getFrameId(frame)
 # Dm = np.diag([2000, 2000, 2000, 1000, 1000, 1000])
 # Km = np.diag([5000, 5000, 5000, 3000, 3000, 3000])
 
-# === Parametri impedanse preko prirodne frekvencije i prigusenja === #
+# === Parametri impedanse preko prirodne ucestanosti i prigusenja === #
 # ---Zeljena krutost--- #
 K_trans = np.array([10000, 10000, 500])  # translacija
 K_rot   = np.array([100, 100, 100])  # rotacija
@@ -61,22 +61,17 @@ Dm_diag = 2.0 * zeta * (K_diag / wn_diag)
 Dm = np.diag(Dm_diag)
 
 # ---Parametri trajektorije, pocetni i krajnji target trajektorije--- #
-x_start = np.array([0.6, -0.2, 0.23,np.pi,0.0,0.0])
-x_goal = np.array([0.6, 0.2, 0.23,np.pi,0.0,0.0])
+x_start = np.array([0.72, -0.22, 0.3,np.pi,0.0,0.0])
+x_goal = np.array([0.72, 0.22, 0.3,np.pi,0.0,0.0])
 
-#Test konverzije rpy uglova, provera konzistentnosti pinocchio biblioteke
-#cilj je proveriti da li direktna i inverzna transformacija rpy daju iste rezultate
-test_rpy = x_start[3:] # uzimanje RPY komponenti iz početne tačke
-test_matrix = pin.rpy.rpyToMatrix(test_rpy) # Konverzija RPY uglova u rotacionu matricu
-back_to_rpy = pin.rpy.matrixToRpy(test_matrix) # Obrnuta konverzija u RPY uglove
-print("Test RPY konverzije:")
-print(f"Original RPY: {test_rpy}")
-print(f"Matrix:\n{test_matrix}")
-print(f"Vraćeno RPY: {back_to_rpy}")
-print(f"Razlika: {test_rpy - back_to_rpy}")
+# === Merenje kontaktne sile === #
+# ---Pronadji indekse senzora po imenu--- #
+force_sensor_id = mujoco.mj_name2id(mujoco_model, mujoco.mjtObj.mjOBJ_SENSOR, "finger_tip_force")
+torque_sensor_id = mujoco.mj_name2id(mujoco_model, mujoco.mjtObj.mjOBJ_SENSOR, "finger_tip_torque")
 
-#inicijalizacija spoljasnje sile, probao sam da testiram sa silom kada je nula i kada je ukljucim dole u kodu
-#Fext = np.zeros(6)
+# ---Dobavi adrese u sensordata nizu--- #
+force_addr = mujoco_model.sensor_adr[force_sensor_id]
+torque_addr = mujoco_model.sensor_adr[torque_sensor_id]
 
 for i in range(N):
     t = i * dt #vreme simulacije
@@ -86,24 +81,16 @@ for i in range(N):
     dq = mujoco_data.qvel[:].copy()
     mujoco.mj_forward(mujoco_model,mujoco_data)
 
-    #Merenje spoljasnjih sila tj kontakata sa okolinom pomocu mujoco
-    # Ova metoda prebrojava sve kontakte i računa ukupne sile i momente
-    contact_forces = []
-    for id, contact in enumerate(mujoco_data.contact):
-        force = np.zeros(6)
-        mujoco.mj_contactForce(mujoco_model, mujoco_data, id, force)
-        contact_forces.append(force.copy())
-    total_contact_force = np.sum([f[:3] for f in contact_forces], axis=0) if contact_forces else np.zeros(3)
-    total_contact_torque = np.sum([f[3:] for f in contact_forces], axis=0) if contact_forces else np.zeros(3)
-    force_magnitude = np.linalg.norm(total_contact_force)
-    Fext = np.concatenate([total_contact_force, total_contact_torque])
-    print(Fext)
-
-    #Podaci o end effectoru
-    pin.framesForwardKinematics(pinocchio_model, pinocchio_data, q) # Računanje kinematike svih frame-ova
+    # Podaci o end effectoru iz Pinocchia
+    pin.framesForwardKinematics(pinocchio_model, pinocchio_data, q)
     poz_orij_hvataljke = pinocchio_data.oMf[frame_id]
     pozicija_hvataljke = poz_orij_hvataljke.translation.copy()
     orijentacija_hvataljke = poz_orij_hvataljke.rotation.copy()
+
+    F = mujoco_data.sensordata[force_addr:force_addr + 3]
+    M = mujoco_data.sensordata[torque_addr:torque_addr + 3]
+    Fext = np.concatenate([F, M])
+    print(Fext)
 
     #Jakobijan
     J = pin.computeFrameJacobian(pinocchio_model, pinocchio_data, q, frame_id, pin.ReferenceFrame.LOCAL_WORLD_ALIGNED)

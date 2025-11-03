@@ -16,3 +16,58 @@ def sinteza_trajektorije(x_start, x_goal, t, T_traj):
         dx_d = (30 * (x_goal - x_start) * t ** 4 / T ** 5 - 60 * (x_goal - x_start) * t ** 3 / T ** 4 + 30 * (x_goal - x_start) * t ** 2 / T ** 3)
         ddx_d = (120 * (x_goal - x_start) * t ** 3 / T ** 5 - 180 * (x_goal - x_start) * t ** 2 / T ** 4 + 60 * (x_goal - x_start) * t / T ** 3)
         return x_d, dx_d, ddx_d
+
+# === Matrice === #
+def matrica_T(fi, teta, psi):
+
+    T = np.array([
+        [0, -np.sin(fi), np.cos(teta)*np.cos(fi)],
+        [0, np.cos(fi), np.cos(teta)*np.sin(fi)],
+        [1, 0, -np.sin(teta)]
+    ])
+    return T
+
+def matrica_T_inv(fi, teta, psi):
+
+    T_inv =  np.array([
+        [(np.cos(fi)*np.sin(teta)/np.cos(teta)), (np.sin(teta)*np.sin(fi)/np.cos(teta)), 1],
+        [-np.sin(fi), np.cos(fi), 0],
+        [np.cos(fi)/np.cos(teta), np.sin(fi)/np.cos(teta), 0]
+    ])
+
+    return T_inv
+
+def izvod_matrice_T(fi, teta, psi, dfi, dteta, dpsi):
+
+    dT = np.array([
+        [0,
+         -np.cos(fi)*dfi,
+         -np.sin(fi)*np.cos(teta)*dfi - np.cos(fi)*np.sin(teta)*dteta],
+
+        [0,
+         -np.sin(fi)*dfi,
+          np.cos(fi)*np.cos(teta)*dfi - np.sin(fi)*np.sin(teta)*dteta],
+
+        [0,
+         0,
+         -np.cos(teta)*dteta]
+    ])
+    return dT
+
+def izvod_matriceT_inv(fi, teta, psi, dfi, dteta, dpsi):
+
+    dT_inv = np.array([
+        [(-dfi * np.sin(fi) * np.tan(teta) + dteta * np.cos(fi) / np.cos(teta) ** 2),
+         (dfi * np.cos(fi) * np.tan(teta) + dteta * np.sin(fi) / np.cos(teta) ** 2),
+         0],
+
+        [-dfi * np.cos(fi),
+         -dfi * np.sin(fi),
+         0],
+
+        [(-dfi * np.sin(fi) / np.cos(teta) + dteta * np.sin(teta) * np.cos(fi) / np.cos(teta) ** 2),
+         (dfi * np.cos(fi) / np.cos(teta) + dteta * np.sin(teta) * np.sin(fi) / np.cos(teta) ** 2),
+         0]
+    ])
+
+    return dT_inv
