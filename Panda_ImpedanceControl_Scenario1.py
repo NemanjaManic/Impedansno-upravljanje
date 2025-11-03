@@ -1,3 +1,5 @@
+#OVA SIMULACIJA PREDSTAVLJA PRVI SCENARIO
+
 import pinocchio as pin
 import numpy as np
 import mujoco
