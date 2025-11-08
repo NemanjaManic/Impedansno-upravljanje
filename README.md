@@ -12,16 +12,15 @@ cd Impedansno-upravljanje
 ```
 
 ### 2. Instalacija Python biblioteka
-Koristim Python 3.10 verziju pythona, u virtuelnom okruženju (preporučeno, PyCharm automatski kreira venv):
+Koristim, Python 3.10 verziju pythona, u virtuelnom okruženju (preporučeno, PyCharm automatski kreira venv):
 ```bash
-# Ako koristiš PyCharm, samo aktiviraj venv koji on kreira
-# Ili ručno kreiraj virtuelno okruženje:
+# Ako koristite PyCharm, samo aktivirajte venv koji on kreira
+# Ili ručno kreirajte virtuelno okruženje:
 python -m venv venv
 source venv/bin/activate # Linux/Mac
 venv\Scripts\activate # Windows
 pip install -r requirements.txt
 ```
-
 
 ### 3. Dodavanje objekta (kutije) u scenu
 
@@ -37,7 +36,7 @@ Ukoliko želite da testirate kontakt i interakciju robota sa okolinom, u `panda.
 ```
 
 ### 4. Pokretanje koda
-Ukoliko želite da pokrenete scenario, gde je kutija i pod pod nagibom i tu uočite primenu impedansnog upravljanja, pokrenite Panda_ImpedanceControl_Scenario1.
+Ukoliko želite da pokrenete scenario, gde je kutija pod nagibom i tu uočite primenu impedansnog upravljanja, pokrenite Panda_ImpedanceControl_Scenario1.
 Ukolko želite da pokrenete scenario, gde primenom neke sile posmatrate kako se robot ponaša podešavanjem parametara impedanse, pokrenite Panda_ImpedanceControl_Scenario2.
 ```bash
 python Panda_ImpedanceControl_Scenario1.py
@@ -53,5 +52,5 @@ python Panda_ImpedanceControl_Scenario2.py
 
 ## Opis
 
-Implementacija impedansnog upravljanja robota koji će prilagođavati svoje ponašanje u kontaktu sa okolinom.
+Implementacija impedansnog upravljanja robota Franka Emika Panda koji će prilagođavati svoje ponašanje u kontaktu sa okolinom. Ovaj rad obuhvata i proučavanja parametara impedanse.
 
