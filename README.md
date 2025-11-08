@@ -25,14 +25,15 @@ pip install -r requirements.txt
 
 ### 3. Dodavanje objekta (kutije) u scenu
 
-Ukoliko želite da testirate kontakt i interakciju robota sa okolinom, u `panda.xml` fajl je potrebno dodati sledeći objekat (geom):
+Ukoliko želite da testirate kontakt i interakciju robota sa okolinom, u `panda.xml` fajl je potrebno dodati sledeći objekat (geom) koji je rotiran za 10 stepeni:
 
 ```xml
-<geom name="large_box"
-      type="box"
-      size="0.2 0.4 0.125"
-      pos="0.6 0.0 0.125"
-      rgba="0.8 0.3 0.3 0.7"/>
+   <body name="box_body" pos="0.6 0.0 0.125" euler="0.1745 0 0">
+       <geom name="large_box" type="box" 
+             size="0.2 0.4 0.125" 
+             rgba="0.8 0.3 0.3 0.7"/>
+
+   </body>
 ```
 
 ### 4. Pokretanje koda
