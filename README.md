@@ -37,7 +37,7 @@ Ukoliko želite da testirate kontakt i interakciju robota sa okolinom, u `panda.
 
 ### 4. Pokretanje koda
 Ukoliko želite da pokrenete scenario, gde je kutija pod nagibom i tu uočite primenu impedansnog upravljanja, pokrenite Panda_ImpedanceControl_Scenario1.
-Ukolko želite da pokrenete scenario, gde primenom neke sile posmatrate kako se robot ponaša podešavanjem parametara impedanse, pokrenite Panda_ImpedanceControl_Scenario2.
+Ukoliko želite da pokrenete scenario, gde primenom neke sile posmatrate kako se robot ponaša podešavanjem parametara impedanse, pokrenite Panda_ImpedanceControl_Scenario2.
 ```bash
 python Panda_ImpedanceControl_Scenario1.py
 python Panda_ImpedanceControl_Scenario2.py
