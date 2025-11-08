@@ -1,6 +1,6 @@
 # Impedansno upravljanje robotom
 
-Diplomski rad - Implementacija impedansnog upravljanja robotom.
+Diplomski rad - Implementacija impedansnog upravljanja robotom Franka Emika Panda.
 
 ## Preuzimanje i instalacija
 
