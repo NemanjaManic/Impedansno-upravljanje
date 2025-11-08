@@ -45,7 +45,8 @@ python Panda_ImpedanceControl_Scenario2.py
 
 ## Struktura projekta
 
-* **Panda_ImpedanceControl_TAU.py** - Glavna skripta za impedansno upravljanje
+* **Panda_ImpedanceControl_Scenario1.py** - Scenario1
+* **Panda_ImpedanceControl_Scenario2.py** - Scenario2
 * **Funkcije.py** - Pomoćne funkcije
 * **requirements.txt** - Lista potrebnih biblioteka
 

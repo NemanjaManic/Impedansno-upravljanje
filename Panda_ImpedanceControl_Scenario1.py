@@ -15,7 +15,7 @@ pinocchio_robot = load_pinocchio("panda_description")
 pinocchio_model = pinocchio_robot.model
 pinocchio_data = pinocchio_robot.data
 # ---mujoco model--- #
-mujoco_model = load_mujoco("panda_mj_description_box")
+mujoco_model = load_mujoco("panda_mj_description")
 mujoco_data = mujoco.MjData(mujoco_model)
 
 # === Parametri simulacije === #
